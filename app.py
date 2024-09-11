@@ -1,6 +1,6 @@
 import os
 from flask import Flask
-from flask import render_template, request
+from flask import render_template, request, jsonify
 
 from modeling.get_model import get_response
 
@@ -18,11 +18,15 @@ def index():
 
 @app.route('/chat', methods = ['POST'])
 def chat():
-    user_message = request.form['user_input']
-    print(f"입력 메세지: {user_message}")
-    llm_message = get_answer(user_message)['result']
-    print(f"답변: {llm_message}")
-    return render_template('test.html', user_message = user_message, llm_message = llm_message)
+    message = eval(request.data.decode())
+    user_message = message['message'][0]['content']
 
-if __name__ = '__main__':
+    print(f"입력 메세지: {user_message}")
+    response = get_response(user_message)
+
+    llm_message = response['result']
+    print(f"답변: {llm_message}")
+    return jsonify({'result': llm_message})
+
+if __name__ == '__main__':
     app.run(host = host_addr, port = port_num, debug = True)
